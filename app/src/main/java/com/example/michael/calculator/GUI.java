@@ -17,9 +17,6 @@ public class GUI extends AppCompatActivity {
     Button b1,b2,b3,b4,b5,b6,b7,b8,b9,b0,badd,bsub,bmul,bdiv,bdec,beq;
     //true if text area contains any message that should be deleted on next input
     boolean viewContainsMessage;
-    int digitsUntilComma;
-    boolean enteringNumber;
-    boolean enteringDecimal;
     int leftParenthesisCount;
     TextView textView;
     @Override
@@ -30,8 +27,6 @@ public class GUI extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         leftParenthesisCount = 0;
-        viewContainsMessage = false;
-        digitsUntilComma = 3;
         textView = (TextView)findViewById(R.id.textView);
     }
 
@@ -58,20 +53,10 @@ public class GUI extends AppCompatActivity {
     }
 
     public void onZero(View view){
-        /* We don't want to allow leading zeroes (example: "0025" should be "25", so return when
-        3 conditions are filled. These 3 conditions are:
-        1 - The text view is not empty
-        2 - enteringNumber is false. This variable is only set to true when the program detects
-        that the user trying to enter a nonzero number. That is, either there is a digit greater than
-        0 to the left and no operators in between, or we are entering a number less than 1 (ex: 0.4)
-        3 - The last character entered was a zero.
-        */
-        int textLength = textView.length() - 1;
-        if(textLength > 0 && !enteringNumber && textView.getText().charAt(textLength) == '0')
-            return;
+
+
         textView.append("0");
-        //decrease
-        addCommas();
+
     }
 
     public void onOne(View view){
@@ -234,9 +219,5 @@ public class GUI extends AppCompatActivity {
         //add commas, etc here
     }
 
-    private void addCommas(){
-        if(enteringNumber && !enteringDecimal) {
-            digitsUntilComma--;
-        }
-    }
+
 }
