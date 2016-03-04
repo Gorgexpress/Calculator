@@ -26,6 +26,8 @@ public class Calculator {
 
             case '*':
             case '/':
+                return (op2 == '(' || op2 == '^');
+            case '^':
                 return op2 == '(';
             case '(':
                 return true;
@@ -49,7 +51,7 @@ public class Calculator {
         int expressionLength = infix.length();
         for(int i = 0; i < expressionLength; i++){
             char token = infix.charAt(i);
-            if (token < '0'){ //token is either an operator
+            if (!Character.isDigit(token)){ //token is either an operator
                 if (token == '-' && (i == 0 || "+-/*(^".indexOf(infix.charAt(i - 1)) >= 0)){
                     //token is an unary operator
                     //We assume the only unary operator allowed is '-'.
@@ -76,7 +78,7 @@ public class Calculator {
                 else{
                     int end = i + 1;
                     token = infix.charAt(end);
-                    while(token >= '0' || token == '.'){
+                    while(Character.isDigit(token) || token == '.'){
                         end++;
                         if(end == expressionLength) break;
                         token = infix.charAt(end);
@@ -109,7 +111,7 @@ public class Calculator {
         int length = postfix.length();
         for (int i = 0; i < postfix.length(); i++){
             char token = postfix.charAt(i);
-            if(token >= '0' && token <= '9') {
+            if(Character.isDigit(token)) {
                 //we have the beginning of the substring containing our number, but we
                 //need to find the end
                 int end = i + 1;
@@ -142,6 +144,9 @@ public class Calculator {
                         break;
                     case '/':
                         stack.push(y / x);
+                        break;
+                    case '^':
+                        stack.push(Math.pow(y, x));
                         break;
                     default:
 
