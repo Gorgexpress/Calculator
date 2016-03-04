@@ -7,7 +7,17 @@ import java.util.Deque;
  * Created by Michael on 2/24/2016.
  */
 
+/**
+ * This class contains a public static method that evaluates an infix expression and
+ * returns the result. Also contains a bunch of private helper methods.
+ */
 public class Calculator {
+    /**
+     * Compares the precedence between two operators.
+     * @param op1 the first operator
+     * @param op2 the second operator
+     * @return true if the first operator has lower presedence than the second operator, false if not
+     */
     private static boolean isLowerPrecedence(char op1, char op2){
         switch(op1) {
             case '+':
@@ -24,6 +34,15 @@ public class Calculator {
         }
 
     }
+
+    /**
+     * Converts an infix expression to postfix.
+     * We eplace unary '-'s to ! operators, so our evaluate method can tell the difference
+     * between unary and binary '-'.
+     * A space character is used as a separator between different numbers.
+     * @param infix
+     * @return
+     */
     private  static String toPostfix(String infix){
         StringBuilder postfix = new StringBuilder();
         Deque<Character> stack = new ArrayDeque<>();
@@ -78,6 +97,13 @@ public class Calculator {
             postfix.append(stack.pop());
         return postfix.toString();
     }
+
+    /**
+     * Evaluates a postfix expression and returns the result as a single double.
+     * @param postfix the expression to evaluate, in postfix format.
+     * @return the resulting double. Can be Infinite or NaN.
+     * @throws InvalidExpressionException if the postfix expression is not valid.
+     */
     private static double evaluate(String postfix) throws InvalidExpressionException{
         Deque<Double> stack = new ArrayDeque<>();
         int length = postfix.length();
@@ -126,6 +152,18 @@ public class Calculator {
         return stack.pop();
     }
 
+    /**
+     * Evaluates an infix expression. It does this by first calling the toPostfix method to convert
+     * infix to postfix, then the evaluate method to evaluate the resulting postfix expresson.
+     * evaluate() will throw InvalidExpressionException if the postfix expression was not valid.
+     * This is usually thrown when the infix param is an invalid expression, so we let the function
+     * calling evaluate() handle instead. It is, however, possible that the it was thrown if some
+     * of the code in this class is incorrect. That has not been the case so far, but it is something
+     * to consider.
+     * @param infix String containig the infix expression to evaluate.
+     * @return The resulting double. Can be infinite or NaN.
+     * @throws InvalidExpressionException if the expression was invalid.
+     */
     public static double calculate(String infix) throws InvalidExpressionException{
         return evaluate(toPostfix(infix));
     }

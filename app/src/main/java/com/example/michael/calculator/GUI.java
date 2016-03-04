@@ -20,13 +20,16 @@ import org.w3c.dom.Text;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+/**
+ * The GUI for our calculator. Contains code for all the necessary onClick functions.
+ */
 public class GUI extends AppCompatActivity {
 
     /**
      * Enum used to tell our Text Watcher how the text was changed
      */
     private enum TextChangeCase {
-        APPEND, DELETE, REPLACE, EQUALS, UNKNOWN
+        APPEND, DELETE, REPLACE, EQUALS, UNSET
     }
 
     //true if text area contains any message that should be deleted on next input
@@ -62,11 +65,19 @@ public class GUI extends AppCompatActivity {
 
             }
 
+            /**
+             *  If the reason for the text being changed is unknown, find the case
+             *  and set the textChangeCase variable for use by the afterTextChanged method
+             * @param s the text after it has been changed
+             * @param start unused
+             * @param before the length of the text before it was changed
+             * @param count unused
+             */
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //If case is not UNKNOWN, then something outside of this method has changed the
-                //the case since our text watcher was called, and we do not want to change it again.
-                if(textChangeCase != TextChangeCase.UNKNOWN)
+                //If case is not UNSET, then something outside of this method has set the
+                //the case since our text watcher was called, and we do not want to change it.
+                if(textChangeCase != TextChangeCase.UNSET)
                     return;
                 else if (s.length() == before) //Text was replaced, length is the same
                     textChangeCase = TextChangeCase.REPLACE;
@@ -77,6 +88,12 @@ public class GUI extends AppCompatActivity {
 
             }
 
+            /**
+             * Responsible for adjust commas if necessary. It does not modify the offsetCurNumber
+             * or modifyingDecimal variables; that is onDel's reponsibility.
+             * Before returning, it sets textChangeCase back to UNSET.
+             * @param s unused
+             */
             @Override
             public void afterTextChanged(Editable s) {
                 if (textChangeCase == TextChangeCase.REPLACE || modifyingDecimal || offsetCurNumber < 0)
@@ -120,7 +137,7 @@ public class GUI extends AppCompatActivity {
                     //nothing to do
                 }
                 //set case to unknown
-                textChangeCase = TextChangeCase.UNKNOWN;
+                textChangeCase = TextChangeCase.UNSET;
             }
         });
     }
@@ -388,8 +405,17 @@ public class GUI extends AppCompatActivity {
         }
     }
 
+    /**
+     * onClick listener for the exponent button.
+     * We do not want the + sign to be placed after the +, -, *, /, (, ^, or . operators. If one of
+     * those operators was the last character entered, we will replace that character instead of
+     * simply appending the ^ sign.
+     * Sets offsetCurNumber to -1 and modifyingDecimal to false to tell the program the user
+     * is not currently inputting a number.
+     * @param view
+     */
     public void onExp(View view) {
-        if ("+-*/().".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
+        if ("+-*/()^.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
             textView.setText(textView.getText().subSequence(0, textView.length() - 1));
 
         textView.append("^");
@@ -397,6 +423,14 @@ public class GUI extends AppCompatActivity {
         modifyingDecimal = false;
     }
 
+    /**
+     * onClick listener for the left parenthesis button.
+     * There are no rules for appending a left parenthesis. We just need to make sure to
+     * increase the left parenthesis counter.
+     * Sets offsetCurNumber to -1 and modifyingDecimal to false to tell the program the user
+     * is not currently inputting a number.
+     * @param view
+     */
     public void onLP(View view){
         leftParenthesisCount++;
         offsetCurNumber = -1;
@@ -404,7 +438,18 @@ public class GUI extends AppCompatActivity {
         textView.append("(");
 
     }
-    //Not allowed to enter a right parenthesis if a matching left parenthesis does not exist
+
+    /**
+     * onClick listener for the right parenthesis button.
+     * Similar to most operators, we do not want a right parenthesis following an operator
+     * other than a unary '-'.
+     * We must also make sure there is a matching left parenthesis by looking at the
+     * leftParenthesisCount variable, and subtract the count if we are introducing
+     * a new matching right parenthesis.
+     * Sets offsetCurNumber to -1 and modifyingDecimal to false to tell the program the user
+     * is not currently inputting a number.
+     * @param view
+     */
     public void onRP(View view){
         if(leftParenthesisCount == 0 ) return;
         if(textView.getText().length() > 0 && "+-*/(.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0) {
@@ -422,12 +467,26 @@ public class GUI extends AppCompatActivity {
         textView.append(")");
     }
 
+    /**
+     * onClick listener for the clear button. Also called if the delete button is held down.
+     * Clears the text view.
+     * Sets offsetCurNumber to -1 and modifyingDecimal to false to tell the program the user
+     * is not currently inputting a number.
+     * @param view
+     */
     public void onClear(View view){
         offsetCurNumber = -1;
         modifyingDecimal = false;
         textView.setText("");
     }
 
+    /**
+     * Appends the given character to the text view. Called by the onClick listeners for
+     * every digit button.
+     * We also check if this is the beginning of a new number by checking if offsetCurNumber
+     * is less than 0. If it is, we set offsetCurNumber to the index of our new character.
+     * @param n the digit to append
+     */
     private void appendNumber(char n){
         if (offsetCurNumber < 0) offsetCurNumber = textView.length();
         textView.append(String.valueOf(n));
