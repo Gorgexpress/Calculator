@@ -7,18 +7,35 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 public class GUI extends AppCompatActivity {
-    Button b1,b2,b3,b4,b5,b6,b7,b8,b9,b0,badd,bsub,bmul,bdiv,bdec,beq;
+
+    /**
+     * Enum used to tell our Text Watcher how the text was changed
+     */
+    private enum TextChangeCase {
+        APPEND, DELETE, REPLACE, EQUALS, UNKNOWN
+    }
+
     //true if text area contains any message that should be deleted on next input
-    boolean viewContainsMessage;
     int leftParenthesisCount;
+    boolean modifyingDecimal;
+    int offsetCurNumber;
+    TextChangeCase textChangeCase;
     TextView textView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +44,85 @@ public class GUI extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         leftParenthesisCount = 0;
+        modifyingDecimal = false;
         textView = (TextView)findViewById(R.id.textView);
+        offsetCurNumber = -1;
+        Button bdel = (Button) findViewById(R.id.bdel);
+        bdel.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                onClear(v);
+                return true;
+            }
+        });
+        textView.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //If case is not UNKNOWN, then something outside of this method has changed the
+                //the case since our text watcher was called, and we do not want to change it again.
+                if(textChangeCase != TextChangeCase.UNKNOWN)
+                    return;
+                else if (s.length() == before) //Text was replaced, length is the same
+                    textChangeCase = TextChangeCase.REPLACE;
+                else if (s.length() > before) //A character was appended
+                    textChangeCase = TextChangeCase.APPEND;
+                else                          //A character was deleted
+                    textChangeCase = TextChangeCase.DELETE;
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (textChangeCase == TextChangeCase.REPLACE || modifyingDecimal || offsetCurNumber < 0)
+                    ;//nothing to do
+                else if (textChangeCase == TextChangeCase.APPEND) {
+                    int length = textView.length();
+                    StringBuilder number = new StringBuilder(textView.getText().subSequence(offsetCurNumber, length));
+                    int index = number.length() - 4;
+                    if (index < 0) return;
+                    textView.removeTextChangedListener(this);
+                    while (index > 0) {
+                        number.setCharAt(index - 1, number.charAt(index));
+                        number.setCharAt(index, ',');
+                        index -= 4;
+                    }
+                    if (index == 0) {
+                        number.insert(0, number.charAt(0));
+                        number.setCharAt(1, ',');
+                    }
+                    textView.setText(textView.getText().subSequence(0, offsetCurNumber).toString() + number.toString());
+                    textView.addTextChangedListener(this);
+                }
+                else if (textChangeCase == TextChangeCase.DELETE) {
+                    int length = textView.length();
+                    StringBuilder number = new StringBuilder(textView.getText().subSequence(offsetCurNumber, length));
+                    int index = length - 4;
+                    if (index < 0) return;
+                    textView.removeTextChangedListener(this);
+                    while (index > 0) {
+                        number.setCharAt(index + 1, number.charAt(index));
+                        number.setCharAt(index, ',');
+                        index -= 4;
+                    }
+                    if (index == 0) {
+                        number.deleteCharAt(1);
+                    }
+                    textView.setText(textView.getText().subSequence(0, offsetCurNumber).toString() + number.toString());
+                    textView.addTextChangedListener(this);
+                }
+                else{ //textChangeCase == TextChangeCase.EQUALS
+                    //nothing to do
+                }
+                //set case to unknown
+                textChangeCase = TextChangeCase.UNKNOWN;
+            }
+        });
     }
 
     @Override
@@ -52,13 +147,25 @@ public class GUI extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * onClick listener for the zero button. Does a few checks before appending to make sure
+     * we avoid leading zeroes, then passes the number to the appendNumber function
+     * @param view
+     */
     public void onZero(View view){
+        if(textView.length() == 0 || modifyingDecimal ||
+                (offsetCurNumber >= 0 && textView.getText().charAt(offsetCurNumber) != '0')) {
+            appendNumber('0');
+        }
 
-
-        textView.append("0");
 
     }
 
+    /**
+     * The onClick listeners for digits 1-9 simply call appendNumber with the corresponding character.
+     * onZero is the only one with extra logic.
+     * @param view
+     */
     public void onOne(View view){
         appendNumber('1');
     }
@@ -95,47 +202,120 @@ public class GUI extends AppCompatActivity {
         appendNumber('9');
     }
 
+    /**
+     * onClick listener for the addition button.
+     * We do not want the + sign to be placed after the +, -, *, /, (, or . operators. If one of
+     * those operators was the last character entered, we will replace that character instead of
+     * simply appending the + sign.
+     * Sets offsetCurNumber to -1 and modifyingDecimal to false to tell the program the user
+     * is not currently inputting a number.
+     * @param view
+     */
     public void onAdd(View view){
         if(textView.getText().length() == 0) return;
         if("+-*/(.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
             textView.setText(textView.getText().subSequence(0, textView.length() - 1));
 
+        offsetCurNumber = -1;
+        modifyingDecimal = false;
         textView.append("+");
+
     }
-    //subtraction is the only operator allowed if no numbers have yet to be entered
+
+    /**
+     * onClick listener for the subtraction button.
+     * We want to allow the - symbol to be used as both a unary and binary operator(to specify
+     * negative numbers), so it has far less restrictions than the other operators.
+     * Replace the previous character instead of simply appending only if the last character
+     * was a - or .
+     * Sets offsetCurNumber to -1 and modifyingDecimal to false to tell the program the user
+     * is not currently inputting a number.
+     * @param view
+     */
     public void onSub(View view){
         if(textView.getText().length() > 0 && "-.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
             textView.setText(textView.getText().subSequence(0, textView.length() - 1));
+        offsetCurNumber = -1;
+        modifyingDecimal = false;
         textView.append("-");
     }
 
+    /**
+     * onClick listener for the multipication button.
+     * We do not want the * sign to be placed after the +, -, *, /, (, or . operators. If one of
+     * those operators was the last character entered, we will replace that character instead of
+     * simply appending the * sign.
+     * Sets offsetCurNumber to -1 and modifyingDecimal to false to tell the program the user
+     * is not currently inputting a number.
+     * @param view
+     */
     public void onMul(View view){
 
         if(textView.getText().length() == 0) return;
         if("+-*/(.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
             textView.setText(textView.getText().subSequence(0, textView.length() - 1));
 
+        offsetCurNumber = -1;
+        modifyingDecimal = false;
         textView.append("*");
+
     }
 
+    /**
+     * onClick listener for the division button.
+     * We do not want the + sign to be placed after the +, -, *, /, (, or . operators. If one of
+     * those operators was the last character entered, we will replace that character instead of
+     * simply appending the / sign.
+     * Sets offsetCurNumber to -1 and modifyingDecimal to false to tell the program the user
+     * is not currently inputting a number.
+     * @param view
+     */
     public void onDiv(View view){
         if(textView.getText().length() == 0) return;
         if("+-*/(.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
             textView.setText(textView.getText().subSequence(0, textView.length() - 1));
 
+        offsetCurNumber = -1;
+        modifyingDecimal = false;
         textView.append("/");
+
     }
 
+    /**
+     * onClick listener for the decimal button.
+     * Only append the decimal separator if the user is in the process of inputting a number.
+     * In the future, we cano consider allowing numbers less than 0 to be started
+     * with a decimal point, such as ".234" instead of "0.234"
+     * Sets offsetCurNumber to -1 and modifyingDecimal to false to tell the program the user
+     * is not currently inputting a number.
+     * @param view
+     */
     public void onDec(View view){
-        if(textView.getText().length() > 0 && "+-*/(.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) < 0)
+        if(offsetCurNumber >= 0) {
+            modifyingDecimal = true;
             textView.append(".");
+        }
     }
 
+    /**
+     * onClick listener for the equals operator. A lot of logic needed here. If the expression
+     * is empty, we just return. Otherwise, we set textChangeCase to TextChangeCase.EQUALS so that
+     * the text view's text watcher knows not to do anything. Then we pass the expression, with
+     * commas removed, to the Calculator class' evaluate method.
+     * The evaluate method will throw an exception if our expression is not valid. We may also
+     * get a result of infinity or NaN if something like division by zero occurs. If any
+     * of this occurs, we display an error message and clear the text field.
+     * If the expression was successfully evaluated, we display the result, set offsetCurNumber to 0
+     * (which is guaranteed to be the start index of the result), and modifyingDecimal to true or
+     * false depending on if the result can be represented as an integer or not.
+     * @param view
+     */
     public void onEq(View view){
-        String text = textView.getText().toString();
+        String text = textView.getText().toString().replace(",", "");
         //if no expression just return
         if (text.length() == 0) return;
-        double result = 0.0;
+        double result;
+        textChangeCase = TextChangeCase.EQUALS;
         try{
             result = Calculator.calculate(text);
         }catch(InvalidExpressionException e){
@@ -168,15 +348,41 @@ public class GUI extends AppCompatActivity {
         else {
             //If the result can be represented as an integer, then do so
             //Otherwise, display the double as a string
-            if(result == Math.floor(result))
-                textView.setText(Integer.toString((int) result));
-            else
-                textView.setText(Double.toString(result));
+            offsetCurNumber = 0;
+            if(result == Math.floor(result)) {
+                modifyingDecimal = true;
+                String resultString = NumberFormat.getIntegerInstance().format((int) result);
+                textView.setText(resultString);
+            }
+            else {
+                modifyingDecimal = false;
+                DecimalFormat formatter = new DecimalFormat();
+                textView.setText(formatter.format(result));
+            }
         }
     }
 
+    /**
+     * onClick listener for the delete button
+     * Our TextWatcher is responsible for adjusting commas in a number that is modified due
+     * to pressing the delete button. However, the onDel method is responsible for managing
+     * the offsetCurNumber and modifyingDecimal variables required by the TextWatcher to make
+     * the correct adjustments.
+     * @param view
+     */
     public void onDel(View view) {
         if (textView.getText().length() > 0) {
+            if(offsetCurNumber < 0 && textView.length() >= 2 && textView.getText().charAt(textView.length() - 2) >= '0'){
+                CharSequence text = textView.getText();
+                int index = text.length() - 2;
+                while(index >= 0 && text.charAt(index) >= '0') {
+                    if (text.charAt(index) == '.') modifyingDecimal = true;
+                    index--;
+                }
+                offsetCurNumber = index + 1;
+            }
+            else if(offsetCurNumber == textView.length() - 1)
+                offsetCurNumber = -1;
             textView.setText(textView.getText().subSequence(0, textView.length() - 1));
 
         }
@@ -187,11 +393,16 @@ public class GUI extends AppCompatActivity {
             textView.setText(textView.getText().subSequence(0, textView.length() - 1));
 
         textView.append("^");
+        offsetCurNumber = -1;
+        modifyingDecimal = false;
     }
 
     public void onLP(View view){
         leftParenthesisCount++;
+        offsetCurNumber = -1;
+        modifyingDecimal = false;
         textView.append("(");
+
     }
     //Not allowed to enter a right parenthesis if a matching left parenthesis does not exist
     public void onRP(View view){
@@ -206,17 +417,20 @@ public class GUI extends AppCompatActivity {
             textView.setText(textView.getText().subSequence(0, textView.length() - 1));
         }
         leftParenthesisCount--;
+        offsetCurNumber = -1;
+        modifyingDecimal = false;
         textView.append(")");
     }
 
     public void onClear(View view){
+        offsetCurNumber = -1;
+        modifyingDecimal = false;
         textView.setText("");
     }
 
     private void appendNumber(char n){
+        if (offsetCurNumber < 0) offsetCurNumber = textView.length();
         textView.append(String.valueOf(n));
-
-        //add commas, etc here
     }
 
 

@@ -43,6 +43,7 @@
                 android:text=")"/>
             <Button
                 android:onClick="onDel"
+                android:id="@+id/bdel"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
