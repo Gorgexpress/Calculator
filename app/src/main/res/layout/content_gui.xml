@@ -13,11 +13,9 @@
         android:id="@+id/textView"
         android:layout_weight="0.35"
         android:gravity="bottom|right"
-        android:paddingRight="10dp"
-        android:clickable="false"
-        android:cursorVisible="false"
-        android:focusable="false"
-        android:focusableInTouchMode="false"/>
+        android:paddingRight="10dp">
+
+    </TextView>
 
     <TableLayout
         android:layout_width="fill_parent"
@@ -31,12 +29,14 @@
             android:layout_weight="0.12">
             <Button
                 android:onClick="onLP"
+                android:id="@+id/blp"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="("/>
             <Button
                 android:onClick="onRP"
+                android:id="@+id/brp"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
@@ -50,6 +50,7 @@
                 android:text="Del"/>
             <Button
                 android:onClick="onClear"
+                android:id="@+id/bclear"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
@@ -64,24 +65,28 @@
 
             <Button
                 android:onClick="onOne"
+                android:id="@+id/b1"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="1"/>
             <Button
                 android:onClick="onTwo"
+                android:id="@+id/b2"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="2"/>
             <Button
                 android:onClick="onThree"
+                android:id="@+id/b3"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="3"/>
             <Button
                 android:onClick="onAdd"
+                android:id="@+id/badd"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
@@ -95,24 +100,28 @@
             android:layout_weight="0.12">
             <Button
                 android:onClick="onFour"
+                android:id="@+id/b4"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="4"/>
             <Button
                 android:onClick="onFive"
+                android:id="@+id/b5"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="5"/>
             <Button
                 android:onClick="onSix"
+                android:id="@+id/b6"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="6"/>
             <Button
                 android:onClick="onSub"
+                android:id="@+id/bsub"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
@@ -126,24 +135,28 @@
             android:layout_weight="0.12">
             <Button
                 android:onClick="onSeven"
+                android:id="@+id/b7"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="7"/>
             <Button
                 android:onClick="onEight"
+                android:id="@+id/b8"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="8"/>
             <Button
                 android:onClick="onNine"
+                android:id="@+id/b9"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="9"/>
             <Button
                 android:onClick="onMul"
+                android:id="@+id/bmul"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
@@ -157,24 +170,28 @@
             android:layout_weight="0.12">
             <Button
                 android:onClick="onZero"
+                android:id="@+id/b0"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="0"/>
             <Button
                 android:onClick="onDec"
+                android:id="@+id/bdec"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="."/>
             <Button
                 android:onClick="onEq"
+                android:id="@+id/beq"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"
                 android:text="="/>
             <Button
                 android:onClick="onDiv"
+                android:id="@+id/bdiv"
                 android:layout_height="fill_parent"
                 android:layout_width="wrap_content"
                 android:layout_weight="1"

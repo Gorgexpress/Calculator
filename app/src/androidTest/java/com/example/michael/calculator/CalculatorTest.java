@@ -105,6 +105,7 @@ public class CalculatorTest extends ActivityTestCase {
 
     @Test
      public void infinite1() {
+        //Positive infinite
         String expression = "9999999999999^9999999999";
         double result = Calculator.calculate(expression);
         assert(Double.isInfinite(result));
@@ -112,6 +113,7 @@ public class CalculatorTest extends ActivityTestCase {
 
     @Test
     public void infinite2() {
+        //Negative infinite
         String expression = "9999999999999^-9999999999";
         double result = Calculator.calculate(expression);
         assert(Double.isInfinite(result));
@@ -119,6 +121,7 @@ public class CalculatorTest extends ActivityTestCase {
 
     @Test
     public void NaN() {
+        //Division by zero
         String expression = "5/0";
         double result = Calculator.calculate(expression);
         assert(Double.isNaN(result));

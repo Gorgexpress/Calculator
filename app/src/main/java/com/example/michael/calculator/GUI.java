@@ -230,7 +230,7 @@ public class GUI extends AppCompatActivity {
      */
     public void onAdd(View view){
         if(textView.getText().length() == 0) return;
-        if("+-*/(.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
+        if("+-*/(.^".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
             textView.setText(textView.getText().subSequence(0, textView.length() - 1));
 
         offsetCurNumber = -1;
@@ -269,7 +269,7 @@ public class GUI extends AppCompatActivity {
     public void onMul(View view){
 
         if(textView.getText().length() == 0) return;
-        if("+-*/(.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
+        if(("+-*/(.^").indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
             textView.setText(textView.getText().subSequence(0, textView.length() - 1));
 
         offsetCurNumber = -1;
@@ -289,7 +289,7 @@ public class GUI extends AppCompatActivity {
      */
     public void onDiv(View view){
         if(textView.getText().length() == 0) return;
-        if("+-*/(.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
+        if("+-*/(.^".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
             textView.setText(textView.getText().subSequence(0, textView.length() - 1));
 
         offsetCurNumber = -1;
@@ -415,7 +415,7 @@ public class GUI extends AppCompatActivity {
      * @param view
      */
     public void onExp(View view) {
-        if ("+-*/()^.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
+        if ("+-*/(^.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
             textView.setText(textView.getText().subSequence(0, textView.length() - 1));
 
         textView.append("^");
@@ -425,13 +425,16 @@ public class GUI extends AppCompatActivity {
 
     /**
      * onClick listener for the left parenthesis button.
-     * There are no rules for appending a left parenthesis. We just need to make sure to
-     * increase the left parenthesis counter.
+     * There is only one rule for appending a left parenthesis, and that is that it cannot be used
+     * right after a right parenthesis.
+     * If a left parenthesis is appended, increases the left parenthesis counter.
      * Sets offsetCurNumber to -1 and modifyingDecimal to false to tell the program the user
      * is not currently inputting a number.
      * @param view
      */
     public void onLP(View view){
+        if(textView.getText().length() > 0 && ")".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0)
+            return;
         leftParenthesisCount++;
         offsetCurNumber = -1;
         modifyingDecimal = false;
@@ -452,7 +455,7 @@ public class GUI extends AppCompatActivity {
      */
     public void onRP(View view){
         if(leftParenthesisCount == 0 ) return;
-        if(textView.getText().length() > 0 && "+-*/(.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0) {
+        if(textView.getText().length() > 0 && "+-*/(^.".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0) {
             if (textView.getText().charAt(textView.getText().length() - 1) == '('){
                 if (leftParenthesisCount > 1)
                     leftParenthesisCount--;
