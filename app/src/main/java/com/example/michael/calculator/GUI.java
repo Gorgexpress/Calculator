@@ -32,12 +32,24 @@ public class GUI extends AppCompatActivity {
         APPEND, DELETE, REPLACE, EQUALS, UNSET
     }
 
-    //true if text area contains any message that should be deleted on next input
+
+    //counts # of left parenthesis without a matching right parenthesis
     int leftParenthesisCount;
+
+    //true if we are inputting a number with decimals, false if not.
     boolean modifyingDecimal;
+
+    //offset index in the text view of the number the user is inputting, or -1 if not inputting a number.
     int offsetCurNumber;
+
+    //Reason why case was changed. Used by Text Watcher.
     TextChangeCase textChangeCase;
+
+    //Contains our calculator's infix expression
     TextView textView;
+
+    //Text view containing previous expressions
+    TextView history;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +62,7 @@ public class GUI extends AppCompatActivity {
         modifyingDecimal = false;
         textView = (TextView)findViewById(R.id.textView);
         offsetCurNumber = -1;
+        history = (TextView)findViewById(R.id.history);
         Button bdel = (Button) findViewById(R.id.bdel);
         bdel.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -328,6 +341,8 @@ public class GUI extends AppCompatActivity {
      * @param view
      */
     public void onEq(View view){
+        //put current expression into history
+        history.setText(textView.getText());
         String text = textView.getText().toString().replace(",", "");
         //if no expression just return
         if (text.length() == 0) return;
@@ -392,7 +407,7 @@ public class GUI extends AppCompatActivity {
             if(offsetCurNumber < 0 && textView.length() >= 2 && textView.getText().charAt(textView.length() - 2) >= '0'){
                 CharSequence text = textView.getText();
                 int index = text.length() - 2;
-                while(index >= 0 && text.charAt(index) >= '0') {
+                while(index >= 0 && Character.isDigit(text.charAt(index))) {
                     if (text.charAt(index) == '.') modifyingDecimal = true;
                     index--;
                 }
