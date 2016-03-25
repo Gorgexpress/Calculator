@@ -13,7 +13,8 @@
         android:id="@+id/history"
         android:gravity="bottom|right"
         android:layout_gravity="center_horizontal"
-        android:layout_weight="0.16" />
+        android:layout_weight="0.16"
+        android:onClick="onHistory"/>
 
     <TextView
         android:layout_width="fill_parent"

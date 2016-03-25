@@ -2,6 +2,7 @@ package com.example.michael.calculator;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -19,12 +20,15 @@ import org.w3c.dom.Text;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 
 /**
  * The GUI for our calculator. Contains code for all the necessary onClick functions.
  */
 public class GUI extends AppCompatActivity {
-
+    public static final int HISTORY_SIZE = 10;
     /**
      * Enum used to tell our Text Watcher how the text was changed
      */
@@ -49,7 +53,9 @@ public class GUI extends AppCompatActivity {
     TextView textView;
 
     //Text view containing previous expressions
-    TextView history;
+    TextView historyView;
+    
+    Deque<String> history;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +68,10 @@ public class GUI extends AppCompatActivity {
         modifyingDecimal = false;
         textView = (TextView)findViewById(R.id.textView);
         offsetCurNumber = -1;
-        history = (TextView)findViewById(R.id.history);
+        history = new ArrayDeque<>();
+        for (int i = 0; i < HISTORY_SIZE; i++)
+            history.add(" ");
+        historyView = (TextView)findViewById(R.id.history);
         Button bdel = (Button) findViewById(R.id.bdel);
         bdel.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -342,7 +351,7 @@ public class GUI extends AppCompatActivity {
      */
     public void onEq(View view){
         //put current expression into history
-        history.setText(textView.getText());
+        historyView.setText(textView.getText());
         String text = textView.getText().toString().replace(",", "");
         //if no expression just return
         if (text.length() == 0) return;
@@ -381,15 +390,19 @@ public class GUI extends AppCompatActivity {
             //If the result can be represented as an integer, then do so
             //Otherwise, display the double as a string
             offsetCurNumber = 0;
+            history.poll();
             if(result == Math.floor(result)) {
                 modifyingDecimal = true;
                 String resultString = NumberFormat.getIntegerInstance().format((int) result);
                 textView.setText(resultString);
+                history.add(historyView.getText().toString() + "=" + resultString);
             }
             else {
                 modifyingDecimal = false;
                 DecimalFormat formatter = new DecimalFormat();
-                textView.setText(formatter.format(result));
+                String resultString = formatter.format(result);
+                textView.setText(resultString);
+                history.add(historyView.getText().toString()+ "=" + resultString);
             }
         }
     }
@@ -510,5 +523,15 @@ public class GUI extends AppCompatActivity {
         textView.append(String.valueOf(n));
     }
 
+    public void onHistory(View view){
+        Intent intent = new Intent(this, History.class);
+        intent.putExtra("history", (new ArrayList<>(history)));
+        startActivity(intent);
+    }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        textView.setText(intent.getStringExtra("expression"));
+    }
 }
