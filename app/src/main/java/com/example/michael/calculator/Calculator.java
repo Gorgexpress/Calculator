@@ -78,7 +78,7 @@ public class Calculator {
                 else{
                     int end = i + 1;
                     token = infix.charAt(end);
-                    while(Character.isDigit(token) || token == '.'){
+                    while(Character.isDigit(token) || token == '.' || token == 'E'){
                         end++;
                         if(end == expressionLength) break;
                         token = infix.charAt(end);
@@ -111,7 +111,7 @@ public class Calculator {
         int length = postfix.length();
         for (int i = 0; i < postfix.length(); i++){
             char token = postfix.charAt(i);
-            if(Character.isDigit(token)) {
+            if(Character.isDigit(token) || token == 'E') {
                 //we have the beginning of the substring containing our number, but we
                 //need to find the end
                 int end = i + 1;
