@@ -3,9 +3,16 @@ package com.example.michael.calculator;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -23,6 +30,9 @@ import java.text.NumberFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+
+import layout.FragmentOne;
+import layout.FragmentTwo;
 
 /**
  * The GUI for our calculator. Contains code for all the necessary onClick functions.
@@ -57,6 +67,9 @@ public class GUI extends AppCompatActivity {
     
     Deque<String> history;
 
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,105 +77,123 @@ public class GUI extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        leftParenthesisCount = 0;
-        modifyingDecimal = false;
-        textView = (TextView)findViewById(R.id.textView);
-        offsetCurNumber = -1;
-        history = new ArrayDeque<>();
-        for (int i = 0; i < HISTORY_SIZE; i++)
-            history.add(" ");
-        historyView = (TextView)findViewById(R.id.history);
-        Button bdel = (Button) findViewById(R.id.bdel);
-        bdel.setOnLongClickListener(new View.OnLongClickListener() {
+        textView = (TextView) findViewById(R.id.textView);
+        historyView = (TextView) findViewById(R.id.history);
+        if(savedInstanceState == null) {
+            leftParenthesisCount = 0;
+            modifyingDecimal = false;
+            offsetCurNumber = -1;
+            history = new ArrayDeque<>();
+            for (int i = 0; i < HISTORY_SIZE; i++)
+                history.add(" ");
+        }
+        else {
+            textView.setText(savedInstanceState.getString("expression"));
+            leftParenthesisCount = savedInstanceState.getInt("leftParenthesisCount");
+            history = new ArrayDeque<>(savedInstanceState.getStringArrayList("history"));
+            leftParenthesisCount = savedInstanceState.getInt("offsetCurNumber");
+            modifyingDecimal = savedInstanceState.getBoolean("modifyingDecimal");
+            historyView.setText(savedInstanceState.getString("historyView"));
+        }
+
+            Button bdel = (Button) findViewById(R.id.bdel);
+
+            ViewPager pager = (ViewPager) findViewById(R.id.gui_view_pager);
+            pager.setAdapter(new MyPagerAdapter(getSupportFragmentManager()));
+
+      /*  bdel.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 onClear(v);
                 return true;
             }
         });
-        textView.addTextChangedListener(new TextWatcher() {
+*/
+            textView.addTextChangedListener(new TextWatcher() {
 
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            }
-
-            /**
-             *  If the reason for the text being changed is unknown, find the case
-             *  and set the textChangeCase variable for use by the afterTextChanged method
-             * @param s the text after it has been changed
-             * @param start unused
-             * @param before the length of the text before it was changed
-             * @param count unused
-             */
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //If case is not UNSET, then something outside of this method has set the
-                //the case since our text watcher was called, and we do not want to change it.
-                if(textChangeCase != TextChangeCase.UNSET)
-                    return;
-                else if (s.length() == before) //Text was replaced, length is the same
-                    textChangeCase = TextChangeCase.REPLACE;
-                else if (s.length() > before) //A character was appended
-                    textChangeCase = TextChangeCase.APPEND;
-                else                          //A character was deleted
-                    textChangeCase = TextChangeCase.DELETE;
-
-            }
-
-            /**
-             * Responsible for adjust commas if necessary. It does not modify the offsetCurNumber
-             * or modifyingDecimal variables; that is onDel's reponsibility.
-             * Before returning, it sets textChangeCase back to UNSET.
-             * @param s unused
-             */
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (textChangeCase == TextChangeCase.REPLACE || modifyingDecimal || offsetCurNumber < 0)
-                    ;//nothing to do
-                else if (textChangeCase == TextChangeCase.APPEND) {
-                    int length = textView.length();
-                    StringBuilder number = new StringBuilder(textView.getText().subSequence(offsetCurNumber, length));
-                    int index = number.length() - 4;
-                    if (index < 0) return;
-                    textView.removeTextChangedListener(this);
-                    while (index > 0) {
-                        number.setCharAt(index - 1, number.charAt(index));
-                        number.setCharAt(index, ',');
-                        index -= 4;
-                    }
-                    if (index == 0) {
-                        number.insert(0, number.charAt(0));
-                        number.setCharAt(1, ',');
-                    }
-                    textView.setText(textView.getText().subSequence(0, offsetCurNumber).toString() + number.toString());
-                    textView.addTextChangedListener(this);
                 }
-                else if (textChangeCase == TextChangeCase.DELETE) {
-                    int length = textView.length();
-                    StringBuilder number = new StringBuilder(textView.getText().subSequence(offsetCurNumber, length));
-                    int index = length - 4;
-                    if (index < 0) return;
-                    textView.removeTextChangedListener(this);
-                    while (index > 0) {
-                        number.setCharAt(index + 1, number.charAt(index));
-                        number.setCharAt(index, ',');
-                        index -= 4;
-                    }
-                    if (index == 0) {
-                        number.deleteCharAt(1);
-                    }
-                    textView.setText(textView.getText().subSequence(0, offsetCurNumber).toString() + number.toString());
-                    textView.addTextChangedListener(this);
+
+                /**
+                 * If the reason for the text being changed is unknown, find the case
+                 * and set the textChangeCase variable for use by the afterTextChanged method
+                 *
+                 * @param s      the text after it has been changed
+                 * @param start  unused
+                 * @param before the length of the text before it was changed
+                 * @param count  unused
+                 */
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    //If case is not UNSET, then something outside of this method has set the
+                    //the case since our text watcher was called, and we do not want to change it.
+                    if (textChangeCase != TextChangeCase.UNSET)
+                        return;
+                    else if (s.length() == before) //Text was replaced, length is the same
+                        textChangeCase = TextChangeCase.REPLACE;
+                    else if (s.length() > before) //A character was appended
+                        textChangeCase = TextChangeCase.APPEND;
+                    else                          //A character was deleted
+                        textChangeCase = TextChangeCase.DELETE;
+
                 }
-                else{ //textChangeCase == TextChangeCase.EQUALS
-                    //nothing to do
+
+                /**
+                 * Responsible for adjust commas if necessary. It does not modify the offsetCurNumber
+                 * or modifyingDecimal variables; that is onDel's reponsibility.
+                 * Before returning, it sets textChangeCase back to UNSET.
+                 *
+                 * @param s unused
+                 */
+                @Override
+                public void afterTextChanged(Editable s) {
+                    if (textChangeCase == TextChangeCase.REPLACE || modifyingDecimal || offsetCurNumber < 0)
+                        ;//nothing to do
+                    else if (textChangeCase == TextChangeCase.APPEND) {
+                        int length = textView.length();
+                        StringBuilder number = new StringBuilder(textView.getText().subSequence(offsetCurNumber, length));
+                        int index = number.length() - 4;
+                        if (index < 0) return;
+                        textView.removeTextChangedListener(this);
+                        while (index > 0) {
+                            number.setCharAt(index - 1, number.charAt(index));
+                            number.setCharAt(index, ',');
+                            index -= 4;
+                        }
+                        if (index == 0) {
+                            number.insert(0, number.charAt(0));
+                            number.setCharAt(1, ',');
+                        }
+                        textView.setText(textView.getText().subSequence(0, offsetCurNumber).toString() + number.toString());
+                        textView.addTextChangedListener(this);
+                    } else if (textChangeCase == TextChangeCase.DELETE) {
+                        int length = textView.length();
+                        StringBuilder number = new StringBuilder(textView.getText().subSequence(offsetCurNumber, length));
+                        int index = length - 4;
+                        if (index < 0) return;
+                        textView.removeTextChangedListener(this);
+                        while (index > 0) {
+                            number.setCharAt(index + 1, number.charAt(index));
+                            number.setCharAt(index, ',');
+                            index -= 4;
+                        }
+                        if (index == 0) {
+                            number.deleteCharAt(1);
+                        }
+                        textView.setText(textView.getText().subSequence(0, offsetCurNumber).toString() + number.toString());
+                        textView.addTextChangedListener(this);
+                    } else { //textChangeCase == TextChangeCase.EQUALS
+                        //nothing to do
+                    }
+                    //set case to unknown
+                    textChangeCase = TextChangeCase.UNSET;
                 }
-                //set case to unknown
-                textChangeCase = TextChangeCase.UNSET;
-            }
-        });
-    }
+            });
+        }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -391,9 +422,16 @@ public class GUI extends AppCompatActivity {
             //Otherwise, display the double as a string
             offsetCurNumber = 0;
             history.poll();
-            if(result == Math.floor(result)) {
+            if(result > (double)Long.MAX_VALUE || result < (double)Long.MIN_VALUE){
+                modifyingDecimal = false;
+                DecimalFormat formatter = new DecimalFormat("0.#####E0");
+                String resultString = formatter.format(result);
+                textView.setText(resultString);
+                history.add(historyView.getText().toString() + "=" + resultString);
+            }
+            else if(result == Math.floor(result)) {
                 modifyingDecimal = true;
-                String resultString = NumberFormat.getIntegerInstance().format((int) result);
+                String resultString = NumberFormat.getIntegerInstance().format((long) result);
                 textView.setText(resultString);
                 history.add(historyView.getText().toString() + "=" + resultString);
             }
@@ -533,5 +571,47 @@ public class GUI extends AppCompatActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         textView.setText(intent.getStringExtra("expression"));
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState){
+        savedInstanceState.putString("expression", textView.getText().toString());
+        savedInstanceState.putString("historyView", historyView.getText().toString());
+        savedInstanceState.putStringArrayList("history", new ArrayList<>(history));
+        savedInstanceState.putInt("offsetCurNumber", offsetCurNumber);
+        savedInstanceState.putInt("leftParenthesisCount", leftParenthesisCount);
+        savedInstanceState.putBoolean("modifyingDecimal", modifyingDecimal);
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+
+    private class MyPagerAdapter extends FragmentStatePagerAdapter {
+
+        public MyPagerAdapter(FragmentManager fm){
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int pos){
+            switch(pos){
+                case 0: return FragmentOne.newInstance("FirstFragment", "Instance 1");
+                case 1: return FragmentTwo.newInstance("SecondFragment", "Instance 2");
+                default: return FragmentOne.newInstance("FirstFragment", "Default");
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+        @Override
+        public float getPageWidth(int position){
+            if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE)
+                return 0.5f;
+            else
+                return 1.0f;
+        }
+
     }
 }
