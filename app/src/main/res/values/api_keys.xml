@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <string name="mailgun_key" translatable="false" templateMergeStrategy="preserve">
-        key-ea7e63ab58a1c0a4eb576e72c127464b
-    </string>
-</resources>
