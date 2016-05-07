@@ -2,6 +2,6 @@
 <resources>
 
     <string name="mailgun_key" translatable="false" templateMergeStrategy="preserve">
-        YOUR_KEY_HERE
+        key-ea7e63ab58a1c0a4eb576e72c127464b
     </string>
 </resources>
