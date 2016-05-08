@@ -498,6 +498,38 @@ public class GUI extends AppCompatActivity {
     }
 
     /**
+     * onClick listener for the subtraction button.
+     * We want to allow the - symbol to be used as both a unary and binary operator(to specify
+     * negative numbers), so it has far less restrictions than the other operators.
+     * Replace the previous character instead of simply appending only if the last character
+     * was a - or .
+     * Sets offsetCurNumber to -1 and modifyingDecimal to false to tell the program the user
+     * is not currently inputting a number.
+     * @param view
+     */
+    public void onSin(View view){
+        if(textView.getText().length() > 0 &&
+                ((".)".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0) ||
+                Character.isDigit(textView.getText().charAt(textView.getText().length() - 1))))
+            textView.setText(textView.getText().subSequence(0, textView.length() - 1));
+        leftParenthesisCount++;
+        offsetCurNumber = -1;
+        modifyingDecimal = false;
+        textView.append("sin(");
+    }
+
+    public void onCos(View view){
+        if(textView.getText().length() > 0 &&
+                ((".)".indexOf(textView.getText().charAt(textView.getText().length() - 1)) >= 0) ||
+                        Character.isDigit(textView.getText().charAt(textView.getText().length() - 1))))
+            textView.setText(textView.getText().subSequence(0, textView.length() - 1));
+        leftParenthesisCount++;
+        offsetCurNumber = -1;
+        modifyingDecimal = false;
+        textView.append("cos(");
+    }
+
+    /**
      * onClick listener for the left parenthesis button.
      * There is only one rule for appending a left parenthesis, and that is that it cannot be used
      * right after a right parenthesis.

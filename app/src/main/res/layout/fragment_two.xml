@@ -49,19 +49,19 @@
         android:layout_weight="0.12">
 
         <Button
-            android:onClick="onOne"
-            android:id="@+id/b1"
+            android:onClick="onSin"
+            android:id="@+id/bsin"
             android:layout_height="fill_parent"
             android:layout_width="wrap_content"
             android:layout_weight="1"
-            android:text="1"/>
+            android:text="sin"/>
         <Button
-            android:onClick="onTwo"
-            android:id="@+id/b2"
+            android:onClick="onCos"
+            android:id="@+id/bcos"
             android:layout_height="fill_parent"
             android:layout_width="wrap_content"
             android:layout_weight="1"
-            android:text="2"/>
+            android:text="cos"/>
         <Button
             android:onClick="onThree"
             android:id="@+id/b3"

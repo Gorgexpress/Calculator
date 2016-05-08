@@ -32,7 +32,7 @@ public class Calculator {
             case '(':
                 return true;
             default:
-                return false;
+                return true;
         }
 
     }
@@ -51,14 +51,19 @@ public class Calculator {
         int expressionLength = infix.length();
         for(int i = 0; i < expressionLength; i++){
             char token = infix.charAt(i);
-            if (!Character.isDigit(token)){ //token is either an operator
+            if (!Character.isDigit(token)){ //token is an operator
                 if (token == '-' && (i == 0 || "+-/*(^".indexOf(infix.charAt(i - 1)) >= 0)){
-                    //token is an unary operator
-                    //We assume the only unary operator allowed is '-'.
+                    //token is an unary minus
                     //We will use '!' to specify a unary '-'.
-                    stack.push('!');
+                    token = '!';
                 }
-                else {
+                else if(Character.isLetter(token)){
+                    //token is sin, cos, etc...
+                    //use first letter to specify that unary operator
+                    //since sin,cos, etc.. take up 3 letters instead of 1, move up an extra 2 spaces
+                    i += 2;
+                }
+
                     while (!stack.isEmpty() && !isLowerPrecedence(stack.peek(), token))
                         postfix.append(stack.pop());
                     if (token == ')') {
@@ -67,7 +72,7 @@ public class Calculator {
                         stack.pop(); //pop '('
                     } else
                         stack.push(token);
-                }
+
 
             }
             else {//token is an operand
@@ -129,6 +134,14 @@ public class Calculator {
                     stack.push(-stack.pop());
                     continue;
                 }
+                else if(token == 's' && stack.size() > 0){
+                    stack.push(Math.sin(stack.pop()));
+                    continue;
+                }
+                else if(token == 'c' && stack.size() > 0){
+                    stack.push(Math.cos(stack.pop()));
+                    continue;
+                }
                 if(stack.size() < 2) throw new InvalidExpressionException("Too few operands for operator " + token);
                 double x = stack.pop();
                 double y = stack.pop();
@@ -170,6 +183,8 @@ public class Calculator {
      * @throws InvalidExpressionException if the expression was invalid.
      */
     public static double calculate(String infix) throws InvalidExpressionException{
+        infix.replaceAll("sin", "s");
+        infix.replaceAll("cos", "c");
         return evaluate(toPostfix(infix));
     }
 
