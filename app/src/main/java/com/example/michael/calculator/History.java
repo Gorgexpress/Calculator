@@ -3,6 +3,7 @@ package com.example.michael.calculator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
+import android.renderscript.RSInvalidStateException;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
@@ -20,9 +21,8 @@ public class History extends AppCompatActivity {
 
         Intent intent = this.getIntent();
         ArrayList<String> history = intent.getStringArrayListExtra("history");
-
-        //if(history.length != GUI.HISTORY_SIZE)
-            //code should never go here, need to change this to throw some error
+        if(history.size() != GUI.HISTORY_SIZE)
+            throw new IllegalStateException("History size not equal to GUI_HISTORY_SIZE constant");
 
         //When a deque is converted to an arraylist, the first element in FIFO order is in
         // the last index.

@@ -213,9 +213,17 @@ public class GUI extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         }
+        else if (id == R.id.action_email) {
+            Intent intent = new Intent(this, Email.class);
+            intent.putExtra("history", (new ArrayList<>(history)));
+            startActivity(intent);
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
+
+
 
     /**
      * onClick listener for the zero button. Does a few checks before appending to make sure
@@ -583,6 +591,8 @@ public class GUI extends AppCompatActivity {
         savedInstanceState.putBoolean("modifyingDecimal", modifyingDecimal);
         super.onSaveInstanceState(savedInstanceState);
     }
+
+
 
 
     private class MyPagerAdapter extends FragmentStatePagerAdapter {
