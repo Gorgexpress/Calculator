@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="mailgun_key" translatable="false" templateMergeStrategy="preserve">
+        key-ea7e63ab58a1c0a4eb576e72c127464b
+    </string>
+    <string name="mailgun_domain" translatable="false" templateMergeStrategy="preserve">
+        https://api.mailgun.net/v3/sandboxea4bfc13d2734e9894d4ecd6f0e56bc9.mailgun.org
+    </string>
+</resources>

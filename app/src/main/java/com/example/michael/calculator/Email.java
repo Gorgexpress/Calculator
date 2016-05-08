@@ -24,7 +24,7 @@ import java.util.ListIterator;
 import java.util.Map;
 
 public class Email extends AppCompatActivity {
-    private final String baseUrl = "https://api.mailgun.net/v3/sandboxea4bfc13d2734e9894d4ecd6f0e56bc9.mailgun.org";
+    private final String baseUrl = getString(R.string.mailgun_key);
     private RequestQueue queue;
     private String text;
 
